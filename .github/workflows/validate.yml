@@ -1,0 +1,39 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  exmcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+
+      # The corpus must conform to the formal .txt grammar. exmcheck lives in
+      # the runtime repository; pin this checkout to the latest runtime
+      # release tag so the validator and the corpus move together.
+      - name: Build exmcheck from the runtime
+        run: |
+          git clone --depth 1 --branch v0.3.0 https://github.com/exploitmatic/exploitmatic /tmp/exploitmatic
+          cd /tmp/exploitmatic/tools/exmcheck
+          go build -o /tmp/exmcheck .
+
+      - name: Validate every .txt file
+        run: |
+          find "$GITHUB_WORKSPACE" -name "*.txt" -print0 | xargs -0 -n1 /tmp/exmcheck
+
+      - name: Check for duplicate solution ids
+        run: |
+          ids=$(grep -rh '^id:' --include='*.txt' . | sed 's/^id:[[:space:]]*//')
+          dupes=$(printf '%s\n' "$ids" | sort | uniq -d)
+          if [ -n "$dupes" ]; then
+            echo "duplicate ids:"
+            printf '%s\n' "$dupes"
+            exit 1
+          fi

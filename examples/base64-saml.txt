@@ -1,0 +1,21 @@
+id: demo/base64-saml
+summary: Decodes a base64 SAML request the page hands over, then delivers a base64 SAML response back (synthetic flow, no real target)
+ref: CVE-2026-8452
+
+# Capture the SAMLRequest value as saml_b64, then extract the ID as reqid and
+# the AssertionConsumerServiceURL as acs from the decoded SAML request. The
+# deliver step then posts a base64 SAML response back. Every line below is
+# the same two sentences, in the language the runtime reads.
+
+http sso
+  # fetch the login page and pull the SAML request values out of it
+  get "/login"
+  expect "SAMLRequest" in the response
+  capture the form field "SAMLRequest" as saml_b64
+  capture the attribute "ID" of saml_b64 base64 as reqid
+  capture the attribute "AssertionConsumerServiceURL" of saml_b64 base64 as acs
+
+http deliver
+  # post the SAML response back, base64-encoded, to the consumer
+  post /acs as a form field SAMLResponse with base64 of "<samlp:Response InResponseTo=\"{reqid}\"/>"
+  expect "accepted" in the response

@@ -1,0 +1,7 @@
+id: host/exec-id
+summary: Runs a command on the operator's host and checks its output.
+
+process whoami
+  run "go version"
+  # run a harmless command and confirm stdout arrives
+  expect "go" in the response

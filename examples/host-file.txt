@@ -1,0 +1,7 @@
+id: host/file-flag
+summary: Reads a file from the operator's host and extracts a flag-shaped string.
+
+file read-flag
+  read "{flag_path}"
+  # read the flag file the replica wrote
+  expect a flag

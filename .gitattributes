@@ -1,0 +1,7 @@
+# .txt files are byte-oriented data; keep LF endings everywhere
+*.txt text eol=lf
+
+# Prose and config follow the platform default
+*.md text
+*.yml text
+*.yaml text
