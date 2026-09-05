@@ -6,27 +6,30 @@ on:
   pull_request:
 
 jobs:
-  exmcheck:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.25"
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
 
-      # The corpus must conform to the formal .txt grammar. exmcheck lives in
-      # the runtime repository; pin this checkout to the latest runtime
-      # release tag so the validator and the corpus move together.
-      - name: Build exmcheck from the runtime
+      - uses: Swatinem/rust-cache@v2
+
+      # The corpus must conform to the formal .txt grammar. The checker is
+      # `exploitmatic check`, built from the runtime repository; pin this
+      # checkout to a runtime release tag once one exists.
+      - name: Build exploitmatic from the runtime
         run: |
-          git clone --depth 1 --branch v0.3.1 https://github.com/exploitmatic/exploitmatic /tmp/exploitmatic
-          cd /tmp/exploitmatic/tools/exmcheck
-          go build -o /tmp/exmcheck .
+          git clone --depth 1 https://github.com/exploitmatic/exploitmatic /tmp/exploitmatic
+          cd /tmp/exploitmatic
+          if [ -f Cargo.toml ]; then WS=.; else WS=cli; fi
+          cargo build --release -p exploitmatic --manifest-path "$WS/Cargo.toml"
+          cp "$WS/target/release/exploitmatic" /tmp/exploitmatic-check
 
       - name: Validate every .txt file
         run: |
-          find "$GITHUB_WORKSPACE" -name "*.txt" -print0 | xargs -0 -n1 /tmp/exmcheck
+          find "$GITHUB_WORKSPACE" -name "*.txt" -print0 | xargs -0 -n1 /tmp/exploitmatic-check check
 
       - name: Check for duplicate solution ids
         run: |

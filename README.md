@@ -76,6 +76,7 @@ exercise.
 | `wp/batch-route-confusion-sqli-rce` | http | CVE-2026-63030, CVE-2026-60137 | REST batch route confusion to SQLi; needs a live WordPress lab |
 | `keycloak/cve-2026-18963-reset-credentials-bypass` | http | CVE-2026-18963 | Keycloak reset-credentials email-gate bypass to account takeover; verified 26.7.1, falsified 26.7.2 |
 | `nextjs/cve-2026-75604-rce` | http | CVE-2026-75604 | Next.js Windows cache-traversal to Server Action key disclosure and forged-action RCE; verified 16.2.11, falsified 16.3.3 |
+| `jenkins/cve-2026-84650-transient-field-overwrite` | http | CVE-2026-84650 | Jenkins transient-field deserialization (SECURITY-4032): inject the transient `<name>` of a protected job from a job you can configure, then overwrite the protected job's config.xml; verified 2.579, falsified 2.568.3 |
 | `https/cve-2021-42013-apache-rce-tls` | https | CVE-2021-42013, CVE-2021-41773 | Apache 2.4.49 path traversal to CGI RCE over TLS |
 | `smtp/cve-2020-7247-opensmtpd-rce` | smtp | CVE-2020-7247 | OpenSMTPD 6.6.1p1 `MAIL FROM` command injection RCE, OOB wget |
 | `ftp/cve-2011-2523-vsftpd-backdoor` | ftp | CVE-2011-2523 | vsftpd 2.3.4 backdoor root shell on port 6200 |
@@ -88,6 +89,7 @@ exercise.
 | `smb/cve-2017-7494-rce` | smb (process) | CVE-2017-7494 | Samba 4.6.3 `is_known_pipename` arbitrary module load |
 | `mysql/cve-2012-2122-auth-bypass` | mysql (process) | CVE-2012-2122 | MySQL 5.5.23 `check_scramble` auth bypass |
 | `process/cve-2014-6271-shellshock` | process | CVE-2014-6271 | Bash 4.3 env function RCE |
+| `process/cve-2026-57062-gpgsm-cms-gcm-short-tag` | process | CVE-2026-57062 | GnuPG gpgsm authenticates a CMS AES-GCM message whose mac is 4 bytes (USN-8720-1); the runtime cmsgcm transform forges it against the target's exported cert, works on a fresh stock box; verified gpgsm 2.4.4, falsified 2.4.4-2ubuntu17.6 |
 | `file/cve-2016-3714-imagetragick` | file | CVE-2016-3714 | ImageMagick 6.8.9-9 MVG `url()` RCE |
 | `telnet/cve-2011-4862-encryption-keyid-dos` | telnet | CVE-2011-4862 | inetutils 1.8 telnetd KEYID overflow crash |
 
@@ -108,6 +110,5 @@ authors are not responsible for misuse.
 
 ## License
 
-Exploitmatic runtime is AGPLv3 (community use, copyleft). Solution corpus
-is Apache 2.0 (open contributions). This repository is the corpus: every
-file here is Apache-2.0. See [LICENSE](LICENSE).
+The Exploitmatic runtime is Apache-2.0, and so is this solution corpus:
+every file here is Apache-2.0. See [LICENSE](LICENSE).

@@ -46,18 +46,17 @@ is verified. Host-scope examples and protocol demos live in `examples/`.
 Run the grammar checker from the runtime repository over your file:
 
 ```sh
-cd <runtime>/tools/exmcheck
-go run . path/to/your-solution.txt
+cargo run -p exploitmatic -- check path/to/your-solution.txt
 ```
 
-`exmcheck` validates the file against the formal ANTLR grammar plus the
-runtime's semantic rules. CI runs the same check over every `.txt` file in
-the repository, so a file that fails it will not merge.
+`exploitmatic check` validates the file against the formal ANTLR grammar plus
+the runtime's semantic rules. CI runs the same check over every `.txt` file
+in the repository, so a file that fails it will not merge.
 
 ## Pull request checklist
 
 - [ ] One logical change per PR.
-- [ ] File passes `exmcheck`.
+- [ ] File passes `exploitmatic check`.
 - [ ] `id` is unique and follows `<vendor>/<slug>`.
 - [ ] `summary` and step comments read cleanly.
 - [ ] `ref:` lines list every CVE.

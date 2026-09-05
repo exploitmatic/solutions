@@ -52,7 +52,7 @@ explain them.
 ## Before you submit
 
 - Validate your file with the runtime's checker:
-  `cd <runtime>/tools/exmcheck && go run . your-file.txt`.
+  `exploitmatic check your-file.txt` (build it with `cargo build -p exploitmatic`).
 - State the replica and verification result in the PR description (see
   CONTRIBUTING.md for the standard).
 - Keep prose direct. No em dashes.
